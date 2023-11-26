@@ -16,7 +16,7 @@ class Build_model:
         self.train_labels=train_labels
         self.test_labels=test_labels
         self.batch_size=64
-        self.epochs=20
+        self.epochs=5
         self.num_classes=8 #len(np.unique(self.train_labels))
 
 
