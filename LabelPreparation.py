@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-
+#import cv2
 
 class LabelPrep:
 
@@ -28,9 +28,11 @@ class Train_Test:
         for file_name in file_list:
             file=os.path.join(self.file_path,file_name)
             image=cv2.imread(file)
+            image=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
             images.append(image)
         images=np.array(images)
         return images
+    
     
 
         

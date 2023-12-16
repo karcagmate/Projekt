@@ -10,6 +10,9 @@ from keras.layers import ELU, PReLU, LeakyReLU
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 class Build_model:
     def __init__(self,train_images,test_images,train_labels,test_labels) -> None:
         self.train_images=train_images
@@ -22,10 +25,10 @@ class Build_model:
 
 
     def normalise_values(self):
-        #self.train_images=self.train_images.astype('float32')
-        #self.tes_images_images=self.test_images.astype('float32')
-        #self.train_images=self.train_images.reshape(-1,250,250,1)
-        #self.test_images=self.test_images.reshape(-1,250,250,1)
+        self.train_images=self.train_images.astype('float32')
+        self.test_images_images=self.test_images.astype('float32')
+        self.train_images=self.train_images.reshape(-1,250,250,1)
+        self.test_images=self.test_images.reshape(-1,250,250,1)
         self.train_labels=to_categorical(self.train_labels) #convert to one hot encoded labels
         self.test_labels=to_categorical(self.test_labels) #convert to one hot encoded leabels
         #split train images and labels into train and validation
@@ -42,7 +45,7 @@ class Build_model:
     def build_model(self):
         
         detection_model=Sequential()
-        detection_model.add(Conv2D(32,kernel_size=(3,3),activation='linear',input_shape=(250,250,3),padding='same'))
+        detection_model.add(Conv2D(32,kernel_size=(3,3),activation='linear',input_shape=(250,250,1),padding='same'))
         detection_model.add(LeakyReLU(alpha=0.1))
         detection_model.add(MaxPooling2D((2,2),padding='same'))
         detection_model.add(Conv2D(64,(3,3),activation='linear',padding='same'))
@@ -69,9 +72,22 @@ class Build_model:
                                             ,verbose='auto',validation_data=(valid_X,valid_label)) 
         self.detection_train=detection_train
         test_eval=detection_model.evaluate(self.test_images,self.test_labels, verbose=0) 
+        #detection_model.predict(self.test_images)
+        predicted_classes=detection_model.predict(self.test_images)
+        predicted_classes=np.argmax(predicted_classes,axis=1)
+        
+        true_classes=np.argmax(self.test_labels,axis=1)
+        cm=confusion_matrix(true_classes,predicted_classes)
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=np.unique(true_classes),
+                    yticklabels=np.unique(true_classes))
+        plt.title('Confusion Matrix')
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        plt.show()
 
-       # print('Test loss: ', test_eval[0])
-       # print ('Test accuracy: ', test_eval[1])
+        print('Test loss: ', test_eval[0])
+        print ('Test accuracy: ', test_eval[1])
     def plot_accu(self):
         accuracy= self.detection_train.history['accuracy']
         val_acc = self.detection_train.history['val_accuracy']
@@ -83,10 +99,19 @@ class Build_model:
         plt.title('Training and validation accuracy')
         plt.legend()
         plt.figure()
-       # plt.plot(epochs, loss,'bo',label='Training Loss')
-       # plt.plot(epochs, val_loss,'b',label='Validation Loss')
-       # plt.title('Training and Validation loss')
+        plt.plot(epochs, loss,'bo',label='Training Loss')
+        plt.plot(epochs, val_loss,'b',label='Validation Loss')
+        plt.title('Training and Validation loss')
         plt.show()
+
+        
+        #target_names=["Class {}".format(i) for i in range(5)]
+        #print(classification_report(self.test_labels,predicted_classes,target_names=target_names))
+        
+
+
+
+
 
          
 

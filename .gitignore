@@ -1,2 +1,6 @@
+
 /frames
 /videos
+*.jpg
+*.zip
+/02_copy
